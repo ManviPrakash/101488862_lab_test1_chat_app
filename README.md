@@ -127,7 +127,7 @@ npm install
 Create a file named `.env` in the root folder:
 
 Example for MongoDB Atlas:
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/LAB_TEST_Comp3133
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority&appName=Cluster
 PORT=3000
 
 
