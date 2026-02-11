@@ -26,6 +26,10 @@ mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB error:", err.message));
+  mongoose.connection.once("open", () => {
+    console.log("Connected DB name:", mongoose.connection.name);
+  });
+ 
 
 function nowString() {
   const d = new Date();
@@ -92,11 +96,7 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// -------- Socket.io logic --------
-/**
- * We keep a map: username -> socket.id
- * so we can send private messages + typing to the right person.
- */
+
 const userSocketMap = new Map();
 
 io.on("connection", (socket) => {
@@ -161,6 +161,13 @@ io.on("connection", (socket) => {
     const toSocketId = userSocketMap.get(to_user);
     if (toSocketId) io.to(toSocketId).emit("privateMessage", doc);
   });
+  // typing indicator for ROOM chat
+socket.on("roomTyping", ({ from_user, room, isTyping }) => {
+  if (!from_user || !room) return;
+  // send to everyone else in the same room (not the typist)
+  socket.to(room).emit("roomTyping", { from_user, isTyping: !!isTyping });
+});
+
 
   // typing indicator (PRIVATE)
   socket.on("privateTyping", ({ from_user, to_user, isTyping }) => {
